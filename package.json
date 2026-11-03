@@ -1,0 +1,16 @@
+{
+  "name": "os-study-space",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Thai operating systems final exam study guide, practice bank and two-sided A4 reference.",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "node scripts/validate-content.mjs && vite build && node scripts/copy-sources.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "export:sheet": "node scripts/export-sheet.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": { "react": "^19.2.0", "react-dom": "^19.2.0", "lucide-react": "^0.468.0", "@fontsource/sarabun": "^5.2.0" },
+  "devDependencies": { "vite": "^7.2.0" }
+}
