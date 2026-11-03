@@ -1,0 +1,263 @@
+PAGE 1
+Synchronization
+
+PAGE 2
+Synchronization Motivation
+• When threads concurrently read/write shared 
+memory, program behavior is undefined
+– Two threads write to the same variable; which one should 
+win?
+• Thread schedule is non-deterministic
+– Behavior changes when re-run program
+• Compiler/hardware instruction reordering
+• Multi-word operations are not atomic
+
+PAGE 3
+Question: Can this panic?
+Thread 1
+p = someComputation();
+pInitialized = true; 
+Thread 2
+while (!pInitialized) 
+; 
+q = someFunction(p); 
+if (q != someFunction(p))
+panic
+
+PAGE 4
+Why Reordering?
+• Why do compilers reorder instructions?
+– Efficient code generation requires analyzing control/data 
+dependency
+– If variables can spontaneously change, most compiler 
+optimizations become impossible
+• Why do CPUs reorder instructions?
+– Write buffering: allow next instruction to execute while write 
+is being completed
+Fix: memory barrier
+– Instruction to compiler/CPU
+– All ops before barrier complete before barrier returns
+– No op after barrier starts until barrier returns
+
+PAGE 5
+Too Much Milk Example
+Person A Person B
+12:30 Look in fridge.  Out of milk.
+12:35 Leave for store.
+12:40 Arrive at store. Look in fridge.  Out of milk.
+12:45 Buy milk. Leave for store.
+12:50 Arrive home, put milk away. Arrive at store.
+12:55 Buy milk.
+13:00 Arrive home, put milk away.
+Oh no!
+
+PAGE 6
+Definitions
+Race condition: output of a concurrent program depends on 
+the order of operations between threads
+Mutual exclusion: only one thread does a particular thing at a 
+time
+– Critical section: piece of code that only one thread can execute 
+at once  
+Lock: prevent someone from doing something
+– Lock before entering critical section, before accessing shared 
+data
+– Unlock when leaving, after done accessing shared data
+– Wait if locked (all synchronization involves waiting!)
+
+PAGE 7
+Too Much Milk, Try #1
+• Correctness property
+– Someone buys if needed (liveness)
+– At most one person buys (safety)
+• Try #1: leave a note
+if (!note)
+if (!milk) {
+leave note
+buy milk
+remove note
+}
+
+PAGE 8
+Too Much Milk, Try #2
+Thread A
+leave note A
+if (!note B) {
+if (!milk)
+buy milk
+}
+remove note A 
+Thread B
+leave note B
+if (!noteA) { 
+if (!milk)
+buy milk
+}
+remove note B 
+
+PAGE 9
+Too Much Milk, Try #3
+Thread A
+leave note A
+while (note B) // X
+do nothing; 
+if (!milk)
+buy milk;
+remove note A
+Thread B
+leave note B
+if (!noteA) {   // Y
+if (!milk)
+buy milk
+}
+remove note B 
+Can guarantee at X and Y that either:
+(i) Safe for me to buy
+(ii) Other will buy, ok to quit
+
+PAGE 10
+Lessons
+• Solution is complicated
+– “obvious” code often has bugs
+• Modern compilers/architectures reorder instructions
+– Making reasoning even more difficult
+• Generalizing to many threads/processors
+– Even more complex: see Peterson’s algorithm 
+
+PAGE 11
+Roadmap
+
+
+PAGE 12
+Locks
+• Lock::acquire
+– wait until lock is free, then take it
+• Lock::release
+– release lock, waking up anyone waiting for it
+1. At most one lock holder at a time (safety)
+2. If no one holding, acquire gets lock (progress)
+3. If all lock holders finish and no higher priority 
+waiters, waiter eventually gets lock (progress)
+
+PAGE 13
+Too Much Milk, #4
+Locks allow concurrent code to be much simpler:
+lock.acquire();
+if (!milk) 
+    buy milk
+lock.release();
+
+PAGE 14
+Lock Example: Malloc/Free
+char *malloc (n) {
+      heaplock.acquire();
+      p = allocate memory
+      heaplock.release();
+      return p;
+}
+void free(char *p) {
+      heaplock.acquire();
+      put p back on free list
+      heaplock.release();
+}
+
+PAGE 15
+Rules for Using Locks
+• Lock is initially free
+• Always acquire before accessing shared data structure
+– Beginning of procedure!
+• Always release after finishing with shared data
+– End of procedure!
+– Only the lock holder can release
+– DO NOT throw lock for someone else to release
+• Never access shared data without lock
+– Danger!
+
+PAGE 16
+Will this code work?
+if (p == NULL) {
+     lock.acquire();
+     if (p == NULL) {
+         p = newP();  
+     }
+     lock.release();
+}
+use p->field1
+newP() {
+      p = malloc(sizeof(p));
+      p->field1 = …
+      p->field2 = …
+      return p;
+}
+
+PAGE 17
+Semaphores
+• Semaphore has a non-negative integer value
+– P() atomically waits for value to become > 0, then decrements
+– V() atomically increments value (waking up waiter if needed)
+• Semaphores are like integers except:
+– Only operations are P and V
+– Operations are atomic
+• If value is 1, two P’s will result in value 0 and one waiter
+• Semaphores are useful for
+– Unlocked wait: interrupt handler, fork/join
+
+PAGE 18
+Condition Variables
+• Waiting inside a critical section
+– Called only when holding a lock
+• Wait: atomically release lock and relinquish 
+processor
+– Reacquire the lock when wakened
+• Signal: wake up a waiter, if any
+• Broadcast: wake up all waiters, if any
+
+PAGE 19
+Condition Variable Design Pattern
+methodThatWaits() {
+    lock.acquire();
+    // Read/write shared state
+    while (!testSharedState()) {
+         cv.wait(&lock);
+     }
+    // Read/write shared state
+    lock.release();
+}
+methodThatSignals() {
+    lock.acquire();
+    // Read/write shared state
+  
+    // If testSharedState is now true
+    cv.signal(&lock);
+    
+    // Read/write shared state
+    lock.release();
+}
+
+PAGE 20
+C#
+• Lock • Condition Variable
+static object _Lock = new object();
+lock (_Lock)
+{
+ …
+}
+lock (_Lock)
+{
+ …
+ Monitor.Wait(_Lock);
+ or
+ Monitor.Pulse(_Lock);
+ Monitor.PulseALL(_Lock);
+ …
+}
+
+PAGE 21
+C#
+• Semaphore
+Semaphore s = new Semaphore(1, 1);
+s.WaitOne();  // P()
+ …
+ …
+ …
+s.Release(); //V()

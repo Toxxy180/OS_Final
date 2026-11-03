@@ -1,0 +1,197 @@
+PAGE 1
+Scheduling
+
+PAGE 2
+Main Points
+• Scheduling policy: what to do next, when there are multiple 
+threads ready to run
+– Or multiple packets to send, or web requests to serve, or …
+• Definitions
+– response time, throughput, predictability
+• Uniprocessor policies
+– FIFO, round robin, optimal
+– multilevel feedback as approximation of optimal
+• Multiprocessor policies
+– Affinity scheduling, gang scheduling
+• Queueing theory
+– Can you predict/improve a system’s response time?
+
+PAGE 3
+Definitions
+• Task/Job
+– User request: e.g., mouse click, web request, shell command, …
+• Latency/response time
+– How long does a task take to complete?
+• Throughput
+– How many tasks can be done per unit of time?
+• Overhead
+– How much extra work is done by the scheduler?
+• Fairness
+– How equal is the performance received by different users?
+• Predictability
+– How consistent is the performance over time?
+
+PAGE 4
+More Definitions
+• Workload
+– Set of tasks for system to perform
+• Preemptive scheduler
+– If we can take resources away from a running task
+• Work-conserving
+– Resource is used whenever there is a task to run
+• Scheduling algorithm 
+– takes a workload as input
+– decides which tasks to do first
+– Performance metric (throughput, latency) as output
+– Only preemptive, work-conserving schedulers to be considered
+
+PAGE 5
+First In First Out (FIFO)
+• Schedule tasks in the order they arrive
+– Continue running them until they complete or give up 
+the processor
+• Example: memcached
+– Facebook cache of friend lists, …
+• On what workloads is FIFO particularly bad?
+
+PAGE 6
+Shortest Job First (SJF)
+• Always do the task that has the shortest remaining 
+amount of work to do
+– Often called Shortest Remaining Time First (SRTF)
+• Suppose we have five tasks arrive one right after 
+each other, but the first one is much longer than 
+the others
+– Which completes first in FIFO? Next?
+– Which completes first in SJF? Next?
+
+PAGE 7
+FIFO vs. SJF
+
+
+PAGE 8
+Question
+• Claim: SJF is optimal for average response time
+– Why?
+• Does SJF have any downsides?
+[Activity in GoEDU – 5 minutes]
+[You can discuss this question with your friends]
+
+PAGE 9
+Question
+• Is FIFO ever optimal?
+• Pessimal?
+[Activity in GoEDU – 10 minutes]
+[You can discuss this question with your friends]
+
+PAGE 10
+Round Robin
+• Each task gets resource for a fixed period of time 
+(time quantum)
+– If task doesn’t complete, it goes back in line
+• Need to pick a time quantum
+– What if time quantum is very long?
+• Infinite?
+– What if time quantum is very short?
+• One instruction?
+[Activity in GoEDU – 10 minutes]
+[You can discuss this question with your friends]
+
+PAGE 11
+Round Robin
+
+
+PAGE 12
+Round Robin vs. FIFO
+• Assuming zero-cost time slice, is Round Robin 
+always better than FIFO?
+
+PAGE 13
+Round Robin vs. FIFO
+
+
+PAGE 14
+Round Robin = Fairness?
+• Is Round Robin always fair?
+• What is fair?
+– FIFO?
+– Equal share of the CPU?
+– What if some tasks don’t need their full share?
+– Minimize worst case divergence?
+• Time task would take if no one else was running
+• Time task takes under scheduling algorithm
+
+PAGE 15
+Mixed Workload
+
+
+PAGE 16
+Max-Min Fairness
+• How do we balance a mixture of repeating tasks:
+– Some I/O bound, need only a little CPU
+– Some compute bound, can use as much CPU as they are 
+assigned
+• One approach: maximize the minimum allocation given 
+to a task
+– If any task needs less than an equal share, schedule the 
+smallest of these first
+– Split the remaining time using max-min
+– If all remaining tasks need at least equal share, split evenly
+
+PAGE 17
+Multi-level Feedback Queue (MFQ)
+• Goals:
+– Responsiveness
+– Low overhead
+– Starvation freedom
+– Some tasks are high/low priority
+– Fairness (among equal priority tasks)
+• Not perfect at any of them!
+• Used in Linux (and probably Windows, MacOS)
+
+PAGE 18
+MFQ
+• Set of Round Robin queues
+– Each queue has a separate priority
+• High priority queues have short time slices
+– Low priority queues have long time slices
+• Scheduler picks first thread in highest priority 
+queue
+• Tasks start in highest priority queue
+– If time slice expires, task drops one level
+
+PAGE 19
+MFQ
+
+
+PAGE 20
+Uniprocessor Summary (1)
+• FIFO is simple and minimizes overhead. 
+• If tasks are variable in size, then FIFO can have 
+very poor average response time. 
+• If tasks are equal in size, FIFO is optimal in terms 
+of average response time. 
+• Considering only the processor, SJF is optimal in 
+terms of average response time. 
+• SJF is pessimal in terms of variance in response 
+time. 
+
+PAGE 21
+Uniprocessor Summary (2)
+• If tasks are variable in size, Round Robin 
+approximates SJF. 
+• If tasks are equal in size, Round Robin will have 
+very poor average response time. 
+• Tasks that intermix processor and I/O benefit from 
+SJF and can do poorly under Round Robin. 
+
+PAGE 22
+Uniprocessor Summary (3)
+• Max-Min fairness can improve response time for 
+I/O-bound tasks. 
+• Round Robin and Max-Min fairness both avoid 
+starvation. 
+• By manipulating the assignment of tasks to priority 
+queues, an MFQ scheduler can achieve a balance 
+between responsiveness, low overhead, and 
+fairness. 

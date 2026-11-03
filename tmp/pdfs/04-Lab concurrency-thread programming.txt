@@ -1,0 +1,45 @@
+PAGE 1
+Thread
+Experiment
+
+PAGE 2
+Experiment #1
+Test order of thread execution and 
+thread switch
+แก้ไข for ทั้ง 2 จุด
+for(i=0; i < 100000; i++)
+
+PAGE 3
+Experiment #2
+• Resource sharing among threads
+
+
+PAGE 4
+Experiment #3
+• Pause a thread
+แก้ไข
+Thread.Sleep(100)
+
+PAGE 5
+Experiment #3.1
+1. Adjust the sleep time so that the 
+output is printed immediately 
+after the last “.” is displayed, as 
+shown in the example on the 
+next page.
+2. Suppose this program, using the 
+sleep time you found in Step 1, is 
+run on another computer that is 
+either faster or slower than the 
+one used in this experiment. Will 
+the output still be the same? 
+Explain your answer .
+
+
+PAGE 6
+Experiment #3.1 desired result
+
+
+PAGE 7
+Experiment #3.2
+• Join thread

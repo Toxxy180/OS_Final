@@ -1,0 +1,124 @@
+PAGE 1
+Introduction
+
+PAGE 2
+First era
+• No OS (before 1956)
+Frontal view of the reconstructed Colossus at The National Museum of Computing, Bletchley Park (image from Wikipedia)
+
+PAGE 3
+Next Era
+Image from: https://www.christies.com/stories/gen-one-paul-allen-history-of-technology-ef080682a70e4a97a53864b475333b12
+[The concepts of OS started in 1956 at GM research lab.]
+In this picture:
+• DEC PDP-10
+• 1966-1983
+• OS: TOPS-10
+• Timesharing/To
+tal Operating 
+System-10
+
+PAGE 4
+A Brief History of OS
+
+PAGE 5
+Early Operating Systems:
+Computers were very expensive
+(1956 – 1960s)
+• One application at a time
+• Had complete control of hardware
+• OS was runtime library
+• Users would stand in line to use the computer
+• Batch systems
+• Keep CPU busy by having a queue of jobs
+• OS would load next job while current one runs
+• Users would submit jobs, and wait, and wait, and 
+
+PAGE 6
+Time-Sharing Operating Systems:
+Computers and People were Expensive
+(1960s – 1970s)
+• ~1959 Integrated circuit was introduced
+• Computing power was increased
+• Multiple users on computer at same time
+• Multiprogramming: run multiple programs at same time
+• Interactive performance: try to complete everyone’s tasks quickly
+• As computers became cheaper, more important to optimize for 
+user time, not computer time
+
+PAGE 7
+Today’s Operating Systems:
+Computers are cheap
+(1980 – today)
+• Smartphones
+• Embedded systems
+• Laptops
+• Tablets
+• Virtual machines
+• Data center servers
+
+PAGE 8
+Tomorrow’s Operating Systems
+• Giant-scale data centers
+• Increasing numbers of processors per computer
+• Increasing numbers of computers per user
+• Very large scale storage
+
+PAGE 9
+Activity #1 - (10 minutes)
+•In the opinion of students, what 
+are the main roles of an 
+operating system?
+
+PAGE 10
+Roles of the Operating System
+• Referee:
+• Resource allocation among users, applications
+• Isolation of different users, applications from each other
+• Communication between users, applications
+• Illusionist
+• Each application appears to have the entire machine to itself
+• Infinite number of processors, (near) infinite amount of memory, 
+reliable storage, reliable network transport
+• Glue
+• Libraries, user interface widgets, …
+
+PAGE 11
+Activity #2 – (10 minutes)
+•What is an Operating Systems?
+
+PAGE 12
+What is an Operating System?
+• A set of software that manage computer’s resources 
+for its users and their applications
+• May visible or invisible to the user
+• 2 major kinds
+• General purpose OS
+• Specific purpose OS
+
+PAGE 13
+Activity #3 – (10 minutes)
+•If you were to evaluate any 
+operating system, what aspects 
+should you assess, and how should 
+each aspect be measured?
+
+PAGE 14
+Operating System Evaluation
+• Reliability and Availability
+• Security
+• Portability
+• AVM, API, HAL
+• Performance
+• Overhead, efficiency
+• Fairness, response time, throughput
+• Performance predictability
+• Adoption
+
+PAGE 15
+Design Tradeoffs
+• Must balance between the 5s
+• Examples 
+• Preserves legacy API → Portability , reliable , secure 
+• Breaking an abstraction → Performance , Portability , 
+Reliability 

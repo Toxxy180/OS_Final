@@ -1,0 +1,436 @@
+PAGE 1
+Process and Context Switch
+Part II
+Mode Switch
+2569/2026
+Slides adapted from CSE 451 class at UW, CS162 class at Berkeley and CSE 421/521 class at UB 
+
+PAGE 2
+From last week…
+Kernel
+User
+System 
+Library
+Interrupt 
+handler
+Other Functions
+User Program
+Interrupt 
+signal
+
+
+PAGE 3
+From last week…
+Kernel
+User
+System 
+Library
+Interrupt 
+handler
+Other Functions
+User Program
+System calls
+End
+Resources 
+(HW , I/O, 
+etc.)
+
+
+PAGE 4
+Question #1
+• Do you have any ideas about how device interrupts 
+work? 
+– Where does the CPU run after an interrupt?
+– What stack does it use?
+– Is the work the CPU had been doing before the 
+interrupt lost forever?  
+– If not, how does the CPU know how to resume that 
+work?
+
+PAGE 5
+How do we take interrupts safely?
+• Interrupt vector
+– Limited number of entry points into kernel
+• Kernel interrupt stack
+– Handler works regardless of state of user code
+• Interrupt masking
+– Handler is non-blocking
+• Atomic transfer of control
+– “Single instruction”-like to change: 
+• Program counter
+• Stack pointer
+• Memory protection
+• Kernel/user mode
+• Transparent restartable execution
+– User program does not know interrupt occurred
+
+PAGE 6
+Where do mode transfers go?
+• Solution: Interrupt Vector
+interrupt number (i)
+intrpHandler_i () {
+ …
+}
+Address and properties of 
+each interrupt handler
+
+PAGE 7
+The Kernel Stack
+• Interrupt handlers want a stack
+• System call handlers want a stack
+code
+Static Data
+heap
+stack
+User
+stack
+Kernel
+PCB
+Process
+
+PAGE 8
+Question #2
+• In your opinion, why can't we just use the user 
+stack?
+• Simplicity
+• Security and Stability
+• Transparency 
+
+PAGE 9
+The Kernel Stack
+• Two-stack model
+– Each OS thread has kernel stack (located in kernel 
+memory) plus user stack (located in user memory)
+• Place to save user registers during interrupt
+
+
+PAGE 10
+Interrupt Stack
+• Per-processor, located in kernel (not user) 
+memory
+– Usually a process/thread has both: kernel and user 
+stack
+
+PAGE 11
+Case Study: x86 Interrupt
+• Save current stack pointer
+• Save current program counter
+• Save current processor status word (condition 
+codes)
+• Switch to kernel stack; put SP, PC, PSW on stack
+• Switch to kernel mode
+• Vector through interrupt table
+• Interrupt handler saves registers it might clobber
+
+PAGE 12
+Before Interrupt
+
+
+PAGE 13
+During Interrupt
+
+
+PAGE 14
+After Interrupt
+OtherRegs.
+
+
+PAGE 15
+At end of handler
+• Handler restores saved registers
+• Atomically return to interrupted process/thread
+– Restore program counter
+– Restore program stack
+– Restore processor status word/condition codes
+– Switch to user mode
+
+PAGE 16
+Interrupt Masking
+• Interrupt handler runs with interrupts off
+– Re-enabled when interrupt completes
+• OS kernel can also turn interrupts off
+– Eg., when determining the next process/thread to run
+– On x86
+• CLI: disable interrrupts
+• STI: enable interrupts
+• Only applies to the current CPU (on a multicore)
+• We’ll need this to implement synchronization in 
+chapter 5
+
+PAGE 17
+Hardware support: Interrupt Control
+• Interrupt processing not visible to the user process:
+– Occurs between instructions, restarted transparently
+– No change to process state
+– What can be observed even with perfect interrupt processing?
+• Interrupt Handler invoked with interrupts ‘disabled’
+– Re-enabled upon completion
+– Non-blocking (run to completion, no waits)
+– Pack up in a queue and pass off to an OS thread for hard work
+• wake up an existing OS thread 
+
+PAGE 18
+Hardware support: Interrupt Control
+• OS kernel may enable/disable interrupts
+– On x86: CLI (disable interrupts), STI (enable)
+– Atomic section when select next process/thread to run
+– Atomic return from interrupt or syscall
+• HW may have multiple levels of interrupts
+– Mask off (disable) certain interrupts, eg., lower priority
+– Certain Non-Maskable-Interrupts (NMI)
+• e.g., kernel segmentation fault
+• Also: Power about to fail!
+
+PAGE 19
+Kernel System Call Handler
+• Vector through well-defined syscall entry points!
+– Table mapping system call number to handler
+• Locate arguments
+– In registers or on user (!) stack
+• Copy arguments
+– From user memory into kernel memory – carefully checking 
+locations!
+– Protect kernel from malicious code evading checks
+• Validate arguments
+– Protect kernel from errors in user code
+• Copy results back 
+– Into user memory – carefully checking locations!
+
+PAGE 20
+Four Fundamental OS Concepts
+• Thread: Execution Context
+– Program Counter, Registers, Execution Flags, Stack
+• Address space (with translation)
+– Program's view of memory is distinct from physical machine
+• Process: an instance of a running program
+– Address Space + One or more Threads
+• Dual mode operation / Protection
+– Only the “system” can access certain resources
+– Combined with translation, isolates programs from each 
+other
+
+PAGE 21
+Let’s review…
+HW
+Memory
+Kernel
+✓
+ ✓
+
+Process
+
+PAGE 22
+Let’s review…
+HW
+Memory
+Process
+System 
+calls
+Other 
+resources
+Kernel
+
+PAGE 23
+Let’s review…
+Memory
+Process
+Kernel
+CPU
+CODE
+ Stack
+PCB
+Stack
+Entry 
+Point
+System 
+functions
+System call
+PC
+ SP
+ EF
+PC
+ SP
+ EF
+Current context
+Switch contextCurrent context
+
+
+PAGE 24
+Main Points
+• Creating and managing processes
+– fork, exec, wait
+• Performing I/O
+– open, read, write, close
+• Communicating between processes
+– pipe, dup, select, connect
+
+PAGE 25
+Shell
+• A shell is a job control system 
+– Allows programmer to create and manage a set of 
+programs to do some task
+– Windows, MacOS, Linux all have shells
+• Example: to compile a C program
+cc –c sourcefile1.c
+cc –c sourcefile2.c
+ln –o program sourcefile1.o sourcefile2.o
+
+PAGE 26
+Windows CreateProcess
+• System call to create a new process to run a 
+program
+– Create and initialize the process control block (PCB) in 
+the kernel
+– Create and initialize a new address space
+– Load the program into the address space
+– Copy arguments into memory in the address space
+– Initialize the hardware context to start execution at 
+``start'’
+– Inform the scheduler that the new process is ready to 
+run
+
+PAGE 27
+Windows CreateProcess API
+(simplified)
+if (!CreateProcess(
+    NULL,       // No module name (use command line)
+    argv[1],    // Command line
+    NULL,       // Process handle not inheritable
+    NULL,       // Thread handle not inheritable
+    FALSE,      // Set handle inheritance to FALSE
+    0,          // No creation flags
+    NULL,       // Use parent's environment block
+    NULL,       // Use parent's starting directory
+    &si,        // Pointer to STARTUPINFO structure
+    &pi )       // Pointer to PROCESS_INFORMATION structure
+)
+
+PAGE 28
+UNIX Process Management
+• UNIX fork – system call to create a copy of the 
+current process, and start it running
+– No arguments!
+• UNIX exec – system call to change the program 
+being run by the current process
+• UNIX wait – system call to wait for a process to 
+finish
+• UNIX signal – system call to send a notification to 
+another process
+
+PAGE 29
+UNIX Process Management
+PID = 100
+PID = 101
+pid=0
+pid=101
+PID = 101
+PID = 100
+T=0 T=1 T=2
+
+PAGE 30
+Question #3
+• Can UNIX fork() return an error?  Why?
+• Can UNIX exec() return an error?  Why?
+• Can UNIX wait() ever return immediately?  Why?
+
+PAGE 31
+Implementing UNIX fork
+Steps to implement UNIX fork
+– Create and initialize the process control block (PCB) in 
+the kernel
+– Create a new address space
+– Initialize the address space with a copy of the entire 
+contents of the address space of the parent
+– Inherit the execution context of the parent (e.g., any 
+open files)
+– Inform the scheduler that the new process is ready to 
+run
+
+PAGE 32
+Implementing UNIX exec
+• Steps to implement UNIX exec
+– Load the program into the current address space
+– Copy arguments into memory in the address space
+– Initialize the hardware context to start execution at 
+``start''
+
+PAGE 33
+UNIX I/O
+• Uniformity
+– All operations on all files, devices use the same set of 
+system calls: open, close, read, write
+• Open before use
+– Open returns a handle (file descriptor) for use in later 
+calls on the file
+• Byte-oriented
+• Kernel-buffered read/write
+• Explicit close
+– To garbage collect the open file descriptor
+
+PAGE 34
+UNIX File System Interface
+• UNIX file open is a Swiss Army knife:
+– Open the file, return file descriptor
+– Options: 
+• if file doesn’t exist, return an error
+• If file doesn’t exist, create file and open it
+• If file does exist, return an error
+• If file does exist, open file
+• If file exists but isn’t empty, nix it then open
+• If file exists but isn’t empty, return an error
+• …
+
+PAGE 35
+Question #4
+Interface Design Question
+• Why not separate syscalls for open/create/exists?
+if (!exists(name))
+     create(name);   // can create fail?
+fd = open(name);     // does the file exist?
+
+PAGE 36
+Implementing a Shell
+char *prog, **args;
+int child_pid;
+// Read and parse the input a line at a time
+while (readAndParseCmdLine(&prog, &args)) {   
+   child_pid = fork();      // create a child process
+    if (child_pid == 0) {
+       exec(prog, args);    // I'm the child process.  Run program 
+      // NOT REACHED
+    } else {
+       wait(child_pid);     // I'm the parent, wait for child
+       return 0;
+    }
+}
+
+PAGE 37
+In Unix
+• A program can be a file of commands
+• A program can send its output to a file
+• A program can read its input from a file
+• The output of one program can be the input to 
+another program 
+
+PAGE 38
+Interprocess Communication
+• Producer-consumer
+– Output of one program is accepted as input of another 
+program
+• One-way communication
+• Pipe
+• Client-server
+• Two-way communication
+• Server implements specialize task
+– Print serve
+• File system
+• Write data to a file then read file as an input
+• Reader and writer are not need to running at the same time
+
+PAGE 39
+Operating system structure
+• Monolithic kernel
+• Microkernel
+
+PAGE 40
+Source:https://techdifferences.com/difference-between-microkernel-and-monolithic-kernel.html

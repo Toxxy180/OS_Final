@@ -1,0 +1,375 @@
+PAGE 1
+Process and Context Switch
+Part I
+The Kernel Abstraction
+2569/2026
+Slides adopted from CSE 451 class at UW, CS162 class at Berkeley and CSE 421/521 class at UB 
+
+PAGE 2
+Computer Hardware (PC)
+• Parts variety
+– Different manufacturers
+• Different instruction sets
+– Different versions of hardware 
+• Difficulty…
+– An app must be developed for the specific hardware
+– No universal app for all hardware
+
+PAGE 3
+Question #1
+• How to deal with the variety of hardware in 
+your opinion?
+
+PAGE 4
+memory
+HW
+Device drivers
+Lib
+Program
+
+PAGE 5
+Tasks
+• Past…
+– Single-task system
+• 1 task at a time
+• Dedicating all resources (HW) to 1 task
+• Today…
+– Multiuser/Multitasking system
+• More than 1 task are running
+• Resources are shared between tasks
+• More than 1 user can access to the system
+• Users can keep their resources to themselves or share them 
+with the others
+
+PAGE 6
+Question #2
+• By transitioning from a single-task system to 
+a multitasking system, what adjustments do 
+we need to make to the system?
+
+PAGE 7
+The model will become
+HW
+memory
+OS
+Program
+Program
+ Program
+Program
+
+PAGE 8
+What does an OS do…
+• Hiding Complexity
+– Variety of HW
+• E.g. different CPU, amount of RAM, I/O devices
+• Kernel is the part of the OS that running all the 
+time on the computer
+– Core part of the OS
+– Manages system resources
+– Acts as a bridge between apps and HW
+
+PAGE 9
+One of the major goals of OS is…
+• Protecting Process and the Kernel
+– Running multiple programs
+• Keep them from interfering with the OS – kernel
+• Keep them from interfering with each other
+
+
+PAGE 10
+Question #3: Protection: WHY?
+By applying protection concepts to processes 
+and the kernel, what could potentially impact the 
+system?
+• Reliability: buggy programs only hurt 
+themselves
+• Security and privacy: trust programs less
+• Fairness: enforce shares of disk, CPU
+
+PAGE 11
+Question #4: Protection: How? (HW/SW)
+How can we implement the protection 
+that was mentioned earlier?
+• 2 Main HW mechanism
+– Memory address translation
+– Dual mode operation
+• Privileged/non-privileged mode
+• System calls
+• SW
+– Process
+– System calls
+
+PAGE 12
+Hardware Protection
+• CPU instructions are divided into
+– Privileged instructions
+– Non-privileged instructions
+• With this, the programs can be classified into two 
+groups: one that can use privileged instructions and 
+the other that cannot.
+– The start of the concept of dual mode of operation
+
+PAGE 13
+Privileged instructions
+• Examples?
+– Send commands to I/O devices
+– Read data from/write data to I/O devices
+– Jump into kernel code
+• What should happen if a user program attempts to 
+execute a privileged instruction?
+– Processor exception
+• Usually halt the process after violation
+
+PAGE 14
+Dual-mode operation
+• At first, it was done by software
+• Later, there is a unit in the CPU that specifically 
+supports this
+if ((privileged instruction)&&(mode != kernel))
+ raise an exception
+else 
+ fetch instruction
+
+PAGE 15
+Hardware Support: 
+Dual-Mode Operation
+• Kernel mode
+– Execution with the full privileges of the hardware
+– Read/write to any memory, access any I/O device, 
+read/write any disk sector, send/read any packet
+• User mode
+– Limited privileges
+– Only those granted by the operating system kernel
+• On the x86, mode stored in EFLAGS register
+• On the MIPS, mode in the status register
+
+PAGE 16
+Hardware Support:
+Dual-Mode Operation
+• Privileged instructions
+– Available to kernel
+– Not available to user code
+• Limits on memory accesses
+– To prevent user code from overwriting the kernel
+• Timer
+– To regain control from a user program in a loop
+• Safe way to switch from user mode to kernel mode, 
+and vice versa
+
+PAGE 17
+User Mode
+• Application program
+–Running in process
+
+PAGE 18
+Virtual Machine:VM
+• Software emulation of an abstract machine
+– Give programs illusion they own the machine
+– Make it look like HW has feature you want
+• 2 types of VM
+– Process VM
+• Supports the execution of a single program (one of the basic 
+function of the OS)
+– System VM
+• Supports the execution of an entire OS and its applications
+
+PAGE 19
+Process VMs
+• GOAL: 
+– Provide an isolation to a program
+• Processes unable to directly impact other processes
+– Boundary to the usage of a memory
+• Fault isolation
+– Bugs in program cannot crash the computer
+– Portability (Program)
+• Write the program for the OS rather the HW
+
+PAGE 20
+Kernel mode & User mode
+OS
+Proc 
+1
+Proc 
+2
+Proc 
+n…
+code
+Static Data
+heap
+stack
+code
+Static Data
+heap
+stack
+code
+Static Data
+heap
+stack
+0000…
+FFFF…
+1000…
+1100…
+3000…
+3080…
+
+
+PAGE 21
+Process Abstraction
+• Process: an instance of a program, running with 
+limited rights
+– Thread: a sequence of instructions within a process
+• Potentially many threads per process (for now 1:1)
+– Address space: set of rights of a process
+• Memory that the process can access
+• Other permissions the process has (e.g., which system calls it 
+can make, what files it can access)
+
+PAGE 22
+Process
+• 2 parts
+– PCB in kernel
+– Others in user
+code
+Static Data
+heap
+stack
+User
+stack
+Kernel
+PCB
+Process
+
+PAGE 23
+Process Control Block: PCB
+• Kernel represents each process as a process 
+control block (PCB)
+– Status (running, ready, blocked, …)
+– Registers, SP, … (when not running)
+– Process ID (PID), User, Executable, Priority, …
+– Execution time, …
+– Memory space, translation tables, …
+• Kernel Scheduler maintains a data structure 
+containing the PCBs
+• Scheduling algorithm selects the next one to run
+
+PAGE 24
+Address Space: In a Picture
+Processor
+registers
+PC:
+0x000…
+0xFFF…
+Code Segment
+Static Data
+heap
+stack
+instruction
+SP:
+
+PAGE 25
+At this points, we should know…
+• Process concept
+– A process is the OS abstraction for executing a 
+program with limited privileges
+• Dual-mode operation: user vs. kernel
+– Kernel-mode: execute with complete privileges
+– User-mode: execute with fewer privileges
+• Safe control transfer
+– How do we switch from one mode to the other?
+
+PAGE 26
+Process and Execution context
+Processor
+registers
+PC:
+0x000…
+0xFFF…
+Code Segment
+Static Data
+heap
+stack
+instruction
+SP:
+CPU
+Process
+Execution
+Context
+
+
+PAGE 27
+Interrupt
+Kernel
+User
+System 
+Library
+Interrupt 
+handler
+Other Functions
+User Program
+Interrupt 
+signal
+
+
+PAGE 28
+System calls
+Kernel
+User
+System 
+Library
+Interrupt 
+handler
+Other Functions
+User Program
+System calls
+End
+Resources 
+(HW , I/O, 
+etc.)
+
+
+PAGE 29
+Mode Switch
+• From user mode to kernel mode
+– Interrupts
+• Triggered by timer and I/O devices
+– Exceptions
+• Triggered by unexpected program behavior
+• Or malicious behavior!
+– System calls (aka protected procedure call)
+• Request by program for kernel to do some operation on its 
+behalf
+• Only limited # of very carefully coded entry points
+
+PAGE 30
+Mode Switch
+• From kernel mode to user mode
+– New process/new thread start
+• Jump to first instruction in program/thread
+– Return from interrupt, exception, system call
+• Resume suspended execution
+– Process/thread context switch
+• Resume some other process
+– User-level upcall (UNIX signal)
+• Asynchronous notification to user program
+
+PAGE 31
+Question #5
+• In your opinion, how should mode switching be 
+conducted to ensure data security and system 
+stability?
+
+PAGE 32
+Implementing Safe Kernel Mode Transfers
+• Carefully constructed kernel code packs up the user 
+process state and sets it aside
+• Must handle weird/buggy/malicious user state
+– Syscalls with null pointers
+– Return instruction out of bounds
+– User stack pointer out of bounds
+• Should be impossible for buggy or malicious user 
+program to cause the kernel to corrupt itself
+• User program should not know interrupt has occurred 
+(transparency)
+
+PAGE 33
+End of Part-I

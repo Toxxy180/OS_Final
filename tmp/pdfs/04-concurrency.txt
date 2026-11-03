@@ -1,0 +1,275 @@
+PAGE 1
+Concurrency
+
+PAGE 2
+Motivation
+• Operating systems (and application programs) often 
+need to be able to handle multiple things happening at 
+the same time
+– Process execution, interrupts, background tasks, system 
+maintenance 
+• Humans are not very good at keeping track of multiple 
+things happening simultaneously
+• Threads are an abstraction to help bridge this gap
+
+PAGE 3
+Why Concurrency?
+• Servers
+– Multiple connections handled simultaneously
+• Parallel programs
+– To achieve better performance
+• Programs with user interfaces
+– To achieve user responsiveness while doing computation
+• Network and disk bound programs
+– To hide network/disk latency
+
+PAGE 4
+Definitions
+• A thread is a single execution sequence that 
+represents a separately schedulable task
+– Single execution sequence: familiar programming model
+– Separately schedulable: OS can run or suspend a thread 
+at any time
+• Protection is an orthogonal concept
+– Can have one or many threads per protection domain
+
+PAGE 5
+Threads in the Kernel and at User-Level
+• Multi-threaded kernel
+– multiple threads, sharing kernel data structures, capable 
+of using privileged instructions
+• Multiprocess kernel
+– Multiple single-threaded processes
+– System calls access shared kernel data structures
+• Multiple multi-threaded user processes
+– Each with multiple threads, sharing same data 
+structures, isolated from other user processes
+
+PAGE 6
+Thread Abstraction
+• Infinite number of processors
+• Threads execute with variable speed
+– Programs must be designed to work with any schedule
+
+
+PAGE 7
+Programmer vs. Processor View
+
+
+PAGE 8
+Possible Executions
+
+
+PAGE 9
+Thread Operations
+• thread_create(thread, func, args)
+– Create a new thread to run func(args)
+• thread_yield()
+– Relinquish processor voluntarily
+• thread_join(thread)
+– In parent, wait for forked thread to exit, then return
+• thread_exit
+– Quit thread and clean up, wake up joiner if any
+
+PAGE 10
+Example: threadHello
+#define NTHREADS 10
+thread_t threads[NTHREADS];
+main() {
+for (i = 0; i < NTHREADS; i++)  
+thread_create(&threads[i], &go, i);
+for (i = 0; i < NTHREADS; i++) {
+exitValue = thread_join(threads[i]);
+printf("Thread %d returned with %ld\n", i, exitValue);
+}
+printf("Main thread done.\n");
+}
+void go (int n) {
+printf("Hello from thread %d\n", n);
+thread_exit(100 + n);
+// REACHED?
+}
+
+PAGE 11
+threadHello: Example Output
+• Why must “thread returned” print 
+in order?
+• What is maximum # of threads 
+running when thread 5 prints 
+hello?
+• Minimum?
+
+
+PAGE 12
+Fork/Join Concurrency
+• Threads can create children, and wait for their 
+completion
+• Data only shared before fork/after join
+• Examples:
+– Web server: fork a new thread for every new 
+connection
+• As long as the threads are completely independent
+– Merge sort
+– Parallel memory copy
+
+PAGE 13
+Thread Data Structures
+
+
+PAGE 14
+Thread Lifecycle
+
+
+PAGE 15
+Implementing Threads: Roadmap
+• Kernel threads
+– Thread abstraction only available to kernel
+– To the kernel, a kernel thread and a single threaded 
+user process look quite similar
+• Multithreaded processes using kernel threads 
+(Linux, MacOS)
+– Kernel thread operations available via syscall
+• User-level threads
+– Thread operations without system calls
+
+PAGE 16
+Multithreaded OS Kernel
+
+
+PAGE 17
+Implementing threads
+• Thread_fork(func, args)
+– Allocate thread control block
+– Allocate stack
+– Build stack frame for base of stack (stub)
+– Put func, args on stack
+– Put thread on ready list
+– Will run sometime later (maybe right away!)
+• stub(func, args): OS/161 mips_threadstart
+– Call (*func)(args)
+– If return, call thread_exit()
+
+PAGE 18
+Thread Stack
+• What if a thread puts too many procedures on its 
+stack?
+– What happens in Java?
+– What happens in the Linux kernel?
+– What happens in OS/161?
+– What should happen?
+
+PAGE 19
+Thread Context Switch
+• Voluntary
+– Thread_yield
+– Thread_join (if child is not done yet)
+• Involuntary
+– Interrupt or exception
+– Some other thread is higher priority
+
+PAGE 20
+Voluntary thread context switch
+• Save registers on old stack
+• Switch to new stack, new thread
+• Restore registers from new stack
+• Return
+• Exactly the same with kernel threads or user 
+threads
+
+PAGE 21
+x86 switch_threads
+# Save caller’s register 
+state
+#  NOTE: %eax, etc. are 
+ephemeral
+pushl %ebx
+pushl %ebp
+pushl %esi
+pushl %edi
+# Get offsetof (struct
+thread, stack)
+mov thread_stack_ofs, %edx
+# Save current stack pointer 
+to old thread's stack, if 
+any.
+movl SWITCH_CUR(%esp), %eax
+movl %esp, (%eax,%edx,1)
+# Change stack pointer to 
+new thread's stack
+# this also changes 
+currentThread
+movl SWITCH_NEXT(%esp), %ecx
+movl (%ecx,%edx,1), %esp
+# Restore caller's register 
+state.
+popl %edi
+popl %esi
+popl %ebp
+popl %ebx
+ret
+
+PAGE 22
+A Subtlety
+• Thread_create puts new thread on ready list
+• When it first runs, some thread calls switchframe
+– Saves old thread state to stack
+– Restores new thread state from stack
+• Set up new thread’s stack as if it had saved its 
+state in switchframe
+– “returns” to stub at base of stack to run func
+
+PAGE 23
+Involuntary Thread/Process Switch
+• Timer or I/O interrupt
+– Tells OS some other thread should run
+• Simple version (OS/161)
+– End of interrupt handler calls switch()
+– When resumed, return from handler resumes kernel 
+thread or user process
+– Thus, processor context is saved/restored twice (once 
+by interrupt handler, once by thread switch)
+
+PAGE 24
+Faster Thread/Process Switch
+• What happens on a timer (or other) interrupt?
+– Interrupt handler saves state of interrupted thread
+– Decides to run a new thread
+– Throw away current state of interrupt handler!
+– Instead, set saved stack pointer to trapframe
+– Restore state of new thread
+– On resume, pops trapframe to restore interrupted thread
+
+PAGE 25
+Multithreaded User Processes (Take 1)
+• User thread = kernel thread (Linux, MacOS)
+– System calls for thread fork, join, exit (and lock, 
+unlock,…)
+– Kernel does context switch
+– Simple, but a lot of transitions between user and kernel 
+mode
+
+PAGE 26
+Multithreaded User Processes
+(Take 1)
+
+
+PAGE 27
+Multithreaded User Processes (Take 2)
+• Green threads (early Java)
+– User-level library, within a single-threaded process
+– Library does thread context switch
+– Preemption via upcall/UNIX signal on timer interrupt
+– Use multiple processes for parallelism
+• Shared memory region mapped into each process
+
+PAGE 28
+Multithreaded User Processes (Take 3)
+• Scheduler activations (Windows 8)
+– Kernel allocates processors to user-level library
+– Thread library implements context switch
+– Thread library decides what thread to run next
+• Upcall whenever kernel needs a user-level 
+scheduling decision
+• Process assigned a new processor
+• Processor removed from process
+• System call blocks in kernel

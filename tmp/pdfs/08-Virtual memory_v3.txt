@@ -1,0 +1,235 @@
+PAGE 1
+Virtual Memory
+
+PAGE 2
+Definitions
+• Cache
+– Copy of data that is faster to access than the original
+– Hit: if cache has copy
+– Miss: if cache does not have copy
+• Cache block
+– Unit of cache storage (multiple memory locations)
+• Temporal locality
+– Programs tend to reference the same memory locations 
+multiple times
+– Example: instructions in a loop
+• Spatial locality
+– Programs tend to reference nearby locations
+– Example: data in a loop
+
+PAGE 3
+Cache Concept (Read)
+
+
+PAGE 4
+Cache Concept (Write)
+Write through: changes sent
+immediately to next level of 
+storage
+Write back: changes stored 
+in cache until cache block is 
+replaced
+
+
+PAGE 5
+Memory Hierarchy
+i7 has 8MB as shared 3rd level cache; 2nd level cache is per-core
+
+PAGE 6
+Cache hit rate
+
+
+PAGE 7
+Example of cache hit rate over time
+
+
+PAGE 8
+Main Points
+• Can we provide the illusion of near infinite 
+memory in limited physical memory?
+– Demand-paged virtual memory
+– Memory-mapped files
+• How do we choose which page to replace?
+– FIFO, MIN, LRU, LFU
+• What types of workloads does caching work 
+for, and how well?
+– Spatial/temporal locality vs. Zipf workloads
+
+PAGE 9
+Hardware address translation
+is a power tool
+• Kernel trap on read/write to selected addresses
+– Copy on write
+– Fill on reference
+– Zero on use
+– Demand paged virtual memory
+– Memory mapped files
+– Modified bit emulation
+– Use bit emulation
+
+
+PAGE 10
+Demand Paging (Before)
+
+
+PAGE 11
+Demand Paging (After)
+
+
+PAGE 12
+Demand Paging
+1. TLB miss
+2. Page table walk
+3. Page fault (page invalid 
+in page table)
+4. Trap to kernel
+5. Convert virtual address 
+to file + offset
+6. Allocate page frame
+– Evict page if needed
+7. Initiate disk block read 
+into page frame
+8. Disk interrupt when 
+DMA complete
+9. Mark page as valid
+10. Resume process at 
+faulting instruction
+11. TLB miss
+12. Page table walk to fetch 
+translation
+13. Execute instruction
+
+PAGE 13
+Allocating a Page Frame
+• Select old page to evict
+• Find all page table entries that refer to old page
+– If page frame is shared
+• Set each page table entry to invalid
+• Remove any TLB entries
+– Copies of now invalid page table entry
+• Write changes on page back to disk, if 
+necessary
+
+PAGE 14
+How do we know if page has been 
+modified?
+• Every page table entry has some bookkeeping 
+– Has page been modified?
+• Set by hardware on store instruction
+• In both TLB and page table entry
+– Has page been recently used?
+• Set by hardware on in page table entry on every TLB miss
+• Bookkeeping bits can be reset by the OS kernel
+– When changes to page are flushed to disk
+– To track whether page is recently used
+
+PAGE 15
+Keeping Track of Page Modifications
+(Before)
+
+
+PAGE 16
+Keeping Track of Page Modifications
+(After)
+
+
+PAGE 17
+Virtual or Physical Dirty/Use Bits
+• Most machines keep dirty/use bits in the page 
+table entry
+• Physical page is
+– Modified if any page table entry that points to it is 
+modified
+– Recently used if any page table entry that points to it 
+is recently used
+• On MIPS, simpler to keep dirty/use bits in the 
+core map
+– Core map: map of physical page frames
+
+PAGE 18
+Models for Application File I/O
+• Explicit read/write system calls
+– Data copied to user process using system call
+– Application operates on data
+– Data copied back to kernel using system call
+• Memory-mapped files
+– Open file as a memory segment
+– Program uses load/store instructions on segment 
+memory, implicitly operating on the file
+– Page fault if portion of file is not yet in memory
+– Kernel brings missing blocks into memory, restarts 
+process
+
+PAGE 19
+Advantages to Memory-mapped Files
+• Programming simplicity, esp for large files
+– Operate directly on file, instead of copy in/copy out
+• Zero-copy I/O
+– Data brought from disk directly into page frame
+• Pipelining
+– Process can start working before all the pages are 
+populated
+• Interprocess communication
+– Shared memory segment vs. temporary file
+
+PAGE 20
+Cache Replacement Policy
+• On a cache miss, how do we choose which 
+entry to replace?
+– Assuming the new entry is more likely to be used 
+in the near future
+– In direct mapped caches, not an issue!
+• Policy goal: reduce cache misses
+– Improve expected case performance
+– Also: reduce likelihood of very poor performance
+
+PAGE 21
+A Simple Policy
+• Random?
+– Replace a random entry
+• FIFO?
+– Replace the entry that has been in the cache the 
+longest time
+– What could go wrong?
+
+PAGE 22
+FIFO in Action
+Worst case for FIFO is if program strides through 
+memory that is larger than the cache
+
+PAGE 23
+MIN, LRU, LFU
+• MIN ✓
+– Replace the cache entry that will not be used for the 
+longest time into the future
+– Optimality proof based on exchange: if evict an entry 
+used sooner, that will trigger an earlier cache miss
+• Least Recently Used (LRU) ✓
+– Replace the cache entry that has not been used for 
+the longest time in the past
+– Approximation of MIN
+• Least Frequently Used (LFU)
+– Replace the cache entry used the least often (in the 
+recent past)
+
+PAGE 24
+LRU/MIN for Sequential Scan
+
+
+PAGE 25
+
+
+PAGE 26
+Belady’s Anomaly
+
+
+PAGE 27
+Recap
+• MIN is optimal
+– replace the page or cache entry that will be used 
+farthest into the future
+• LRU is an approximation of MIN
+– For programs that exhibit spatial and temporal 
+locality
+• Clock/Nth Chance is an approximation of LRU
+– Bin pages into sets of “not recently used”
