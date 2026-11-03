@@ -1,5 +1,5 @@
 # OS / study space
-
+หน้าเว็บไซต์ = https://toxxy180.github.io/OS_Final/
 เว็บภาษาไทยสำหรับทบทวนวิชา Operating Systems ก่อน Final จาก PDF ใน `OS_Files` ทั้ง 10 ไฟล์ รวมเป็น 8 บทตามเลข 01–08 รองรับข้อสอบแบบ open book A4 หน้าหลัง, multiple choice, เขียนอธิบาย และคำนวณ
 
 ## ใช้งาน
