@@ -1,0 +1,24 @@
+label { display: block; min-width: 0; font-size: 15px; font-weight: 500; }
+input, select, textarea { color: #20332b; }
+/* Text fields only: radio/checkbox layout belongs to its own component. */
+label > input:not([type=checkbox]):not([type=radio]), label > select, label > textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #c4cec0;
+  background: #fff;
+  border-radius: 8px;
+  margin-top: 8px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+select { text-overflow: ellipsis; }
+label > small { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 5px; }
+textarea { resize: vertical; line-height: 1.9; min-height: 150px; }
+input[type=checkbox], input[type=radio] { accent-color: var(--green); }
+.checkbox-field { cursor: pointer; min-height: 44px; }
+.search-field > input:not([type=checkbox]):not([type=radio]) {
+  border: 0; border-radius: 0; margin: 0; background: transparent; padding: 14px 0;
+}

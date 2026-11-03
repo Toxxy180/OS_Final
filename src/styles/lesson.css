@@ -1,0 +1,236 @@
+.lesson-layout {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 210px;
+  gap:42px;
+  align-items:start
+}
+.lesson-article {
+  font-size:17px;
+  line-height:1.9;
+  min-width:0
+}
+.lesson-article h1 {
+  font-size:37px;
+  margin-bottom:3px
+}
+.english-title {
+  font-size:22px;
+  color:var(--muted);
+  margin-bottom:12px
+}
+.lesson-toolbar {
+  display:flex;
+  gap:24px;
+  align-items:center;
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+  margin:24px 0 30px;
+  padding-bottom:15px;
+  font-size:15px
+}
+.tab {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:var(--muted);
+  font-size:15px;
+  position:relative
+}
+.tab.active {
+  font-weight:700;
+  color:var(--green)
+}
+.tab.active:after {
+  content:'';
+  position:absolute;
+  bottom:-20px;
+  left:0;
+  right:0;
+  height:3px;
+  background:var(--green);
+  border-radius:10px
+}
+.lesson-article h2 {
+  font-size:25px
+}
+.lesson-article>section {
+  margin-bottom:45px;
+  scroll-margin-top:28px
+}
+.objectives ul {
+  padding-left:23px
+}
+.objectives li {
+  font-size:16px
+}
+.contents-rail {
+  position:sticky;
+  top:30px;
+  border-left:1px solid var(--line);
+  padding-left:23px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  max-height:calc(100vh - 60px);
+  overflow:auto
+}
+.contents-rail h3 {
+  font-size:18px;
+  margin-bottom:6px
+}
+.contents-rail button {
+  font-size:14px;
+  line-height:1.6;
+  text-align:left;
+  border:0;
+  background:transparent;
+  padding:0;
+  color:var(--muted)
+}
+.contents-rail button:hover {
+  color:var(--green);
+  text-decoration:underline
+}
+.contents-rail>span {
+  font-size:12px;
+  margin-top:10px
+}
+.lesson-section {
+  padding-bottom:23px;
+  border-bottom:1px solid var(--line)
+}
+.lesson-section p {
+  margin-bottom:17px
+}
+.table-scroll {
+  overflow:auto;
+  margin:20px 0;
+  border:1px solid var(--line);
+  border-radius:10px
+}
+table {
+  border-collapse:collapse;
+  width:100%;
+  font-size:14px;
+  line-height:1.8
+}
+th {
+  background:#e8eee4;
+  font-weight:600;
+  text-align:left;
+  padding:12px 15px;
+  vertical-align:top
+}
+td {
+  border-top:1px solid var(--line);
+  padding:12px 15px;
+  vertical-align:top
+}
+pre {
+  background:#e9eee5;
+  border:1px solid var(--line);
+  padding:20px;
+  border-radius:10px;
+  overflow-x:auto;
+  font-size:14px;
+  line-height:1.8;
+  tab-size:2
+}
+code {
+  font-family:Consolas,'Sarabun',monospace
+}
+.worked-example {
+  padding:24px 26px;
+  background:#e6eee1;
+  border-radius:12px;
+  margin:24px 0
+}
+.worked-example h3 {
+  font-size:20px;
+  color:var(--green)
+}
+.worked-example ol {
+  padding-left:22px
+}
+.example-answer {
+  border-top:1px solid #c4d3bd;
+  padding-top:12px;
+  font-weight:600;
+  margin-bottom:0!important
+}
+.callout {
+  background:#eef0e8;
+  padding:18px 22px;
+  border-left:3px solid #799363;
+  margin:20px 0;
+  font-size:15px;
+  border-radius:0 8px 8px 0
+}
+.callout p:last-child {
+  margin-bottom:0
+}
+.connection-list>a {
+  display:flex;
+  align-items:center;
+  gap:18px;
+  padding:20px 0;
+  border-bottom:1px solid var(--line);
+  color:inherit
+}
+.connection-list>a>div {
+  flex:1
+}
+.connection-list h3 {
+  font-size:17px;
+  margin:0
+}
+.connection-list p {
+  font-size:15px;
+  margin:3px 0 0
+}
+.source-links {
+  display:flex;
+  flex-direction:column;
+  gap:12px
+}
+.source-links a {
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  font-size:14px;
+  overflow-wrap:anywhere
+}
+.source-links svg {
+  margin-top:5px
+}
+.source-links small {
+  display:block;
+  color:var(--muted);
+  font-size:12px
+}
+.lesson-end {
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  padding-top:20px
+}
+.flow-diagram {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin:20px 0 35px
+}
+.flow-diagram span {
+  flex:1;
+  min-width:120px;
+  padding:15px;
+  border:1px solid #9fb49c;
+  border-radius:8px;
+  text-align:center;
+  font-weight:600;
+  font-size:15px
+}
+.flow-diagram span:nth-of-type(2) {
+  background:var(--sage)
+}

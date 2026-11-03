@@ -1,0 +1,117 @@
+.sidebar {
+  position:fixed;
+  inset:0 auto 0 0;
+  width: var(--sidebar-width);
+  background:#fff;
+  border-right:1px solid var(--line);
+  padding:29px 18px 23px;
+  display:flex;
+  flex-direction:column;
+  z-index:30
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:11px;
+  font-weight:700;
+  font-size:19px;
+  white-space:nowrap;
+  color:#20332b
+}
+.brand-mark {
+  width:42px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:var(--green);
+  color:#fff;
+  font-size:22px;
+  font-weight:600;
+  flex-shrink:0
+}
+.sidebar>.brand {
+  margin:0 4px 35px
+}
+.sidebar nav {
+  display:flex;
+  flex-direction:column;
+  gap:7px
+}
+.sidebar nav a {
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:12px 17px;
+  border-radius:10px;
+  font-size:17px;
+  font-weight:500;
+  color:#293b32;
+  min-height:49px
+}
+.sidebar nav a:hover {
+  background:#f2f5ee
+}
+.sidebar nav a.active {
+  background:#e5edde;
+  color:#1d4e3e
+}
+.sidebar-progress {
+  margin-top:auto;
+  padding-top:22px;
+  border-top:1px solid var(--line);
+  font-size:14px
+}
+.sidebar-progress>div {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px
+}
+.sidebar-progress small {
+  font-size:12px;
+  color:var(--muted)
+}
+progress {
+  width:100%;
+  height:9px;
+  border:0;
+  border-radius:20px;
+  overflow:hidden;
+  appearance:none;
+  background:#dfe6db
+}
+progress::-webkit-progress-bar {
+  background:#dfe6db;
+  border-radius:20px
+}
+progress::-webkit-progress-value {
+  background:#3d6c52;
+  border-radius:20px
+}
+progress::-moz-progress-bar {
+  background:#3d6c52;
+  border-radius:20px
+}
+.mobile-header {
+  display:none
+}
+.drawer-heading {
+  display: none;
+}
+.main-content {
+  margin-left:248px;
+  max-width:1600px;
+  padding:0 58px 60px;
+  outline:none
+}
+.topbar {
+  height:84px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  font-size:14px;
+  font-weight:500;
+  color:var(--muted);
+  margin-bottom:18px
+}
